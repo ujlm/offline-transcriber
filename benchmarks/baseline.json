@@ -1,0 +1,45 @@
+{
+  "created_at": "2026-05-05T12:39:07.908760+00:00",
+  "suite": "smoke",
+  "backend": "transformers",
+  "requested_device": "mps",
+  "resolved_device": "mps",
+  "thresholds": {
+    "max_wer_delta_pp": 0.5,
+    "max_rtfx_drop_pct": 10.0
+  },
+  "items": [
+    {
+      "item_id": "earnings22-000",
+      "source": "earnings22",
+      "audio_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/data/earnings22-000.wav",
+      "profile_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/results/20260505T123907Z/earnings22-000/earnings22-000.profile.json",
+      "txt_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/results/20260505T123907Z/earnings22-000/earnings22-000.txt",
+      "duration_s": 36.36,
+      "total_duration_s": 29.6409,
+      "transcribe_duration_s": 27.8467,
+      "diarize_duration_s": 0.0001,
+      "decode_duration_s": 0.1787,
+      "rtfx": 1.2748368747463794,
+      "wer": 0.08333333333333333,
+      "peak_python_mb": 176.7118,
+      "peak_torch_mb": 3940.1592
+    },
+    {
+      "item_id": "earnings22-001",
+      "source": "earnings22",
+      "audio_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/data/earnings22-001.wav",
+      "profile_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/results/20260505T123907Z/earnings22-001/earnings22-001.profile.json",
+      "txt_path": "/Users/ulyssemaes/Documents/Coding/Projects/Scribewave/offline transcription/cohere-transcription/benchmarks/results/20260505T123907Z/earnings22-001/earnings22-001.txt",
+      "duration_s": 34.0001,
+      "total_duration_s": 2.4431,
+      "transcribe_duration_s": 1.8867,
+      "diarize_duration_s": 0.0001,
+      "decode_duration_s": 0.2944,
+      "rtfx": 17.861875231886362,
+      "wer": 0.05084745762711865,
+      "peak_python_mb": 5.3056,
+      "peak_torch_mb": 3940.1592
+    }
+  ]
+}

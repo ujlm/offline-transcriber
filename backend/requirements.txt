@@ -1,0 +1,38 @@
+# Stage 1 Python dependencies. CPU-only torch.
+# Install with:
+#   pip install -r backend/requirements.txt
+#
+# torch / torchaudio CPU wheels:
+#   on macOS arm64, the default PyPI wheels are CPU.
+#   on Linux/Windows, the default wheels are CPU as well unless you opt into CUDA.
+#
+# Note on `lightning`:
+#   The `lightning` package on PyPI is currently in "quarantined" status, so
+#   `pip install lightning` fails for everyone with "no matching distribution".
+#   pyannote.audio 3.x hard-depends on it, so we install the official wheel
+#   directly from Lightning AI's GitHub releases. Bump the version (and pin)
+#   below if/when the PyPI quarantine is lifted.
+
+lightning @ https://github.com/Lightning-AI/pytorch-lightning/releases/download/2.6.1/lightning-2.6.1-py3-none-any.whl
+
+transformers>=5.4.0
+# torch / torchaudio are upper-bounded at <2.9 because torchaudio 2.9 removed
+# `torchaudio.AudioMetaData`, which pyannote.audio 3.x still imports at module
+# load time. Bump the cap once pyannote.audio adds support (or we move to 4.x).
+torch>=2.4,<2.9
+torchaudio>=2.4,<2.9
+huggingface_hub>=0.25
+soundfile
+librosa
+sentencepiece
+protobuf
+silero-vad>=5
+pyannote.audio>=3.3,<4
+python-docx
+numpy
+pyyaml
+
+# Optional benchmark/runtime extras (install only when needed):
+#   pip install -r backend/requirements-bench.txt
+# Includes:
+# - datasets + jiwer + whisper-normalizer for benchmark WER harness

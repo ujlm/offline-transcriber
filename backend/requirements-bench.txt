@@ -1,0 +1,4 @@
+-r requirements.txt
+datasets>=2.20.0
+jiwer
+whisper-normalizer

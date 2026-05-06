@@ -1,0 +1,54 @@
+---
+description: Parakeet encoder attention-mask backport (transformers ports NeMo's -10000.0 as float("-inf"), which NaNs on MPS for padded clips)
+globs: backend/asr.py,backend/pipeline.py
+alwaysApply: false
+---
+
+# Parakeet encoder mask-fix patch (must survive transformers upgrades)
+
+## The bug
+
+In `transformers/models/parakeet/modeling_parakeet.py`, `ParakeetEncoderAttention.forward` masks padded query rows with `float("-inf")`:
+
+```python
+matrix_bd = matrix_bd.masked_fill_(attention_mask.logical_not(), float("-inf"))
+```
+
+For padded clips, that line fills entire query rows with `-inf`. The next softmax is then `0/0` for those rows, and PyTorch's MPS softmax returns `NaN` (CUDA / CPU happen to return zeros, hence the bug looks "MPS-only"). One NaN row gets matmul'd into the next conv block and the entire encoder hidden state goes NaN → empty transcription.
+
+The original NeMo Parakeet implementation uses `-10000.0` precisely to avoid this; the transformers port's own comment (right above the buggy line) flags the divergence:
+
+```text
+# here the original codebase uses -10000.0 rather than float("-inf") and then manual masked fill with 0.0s
+# we rather went for a straight-forward approach with float("-inf")
+```
+
+## What we ship
+
+`_patch_encoder_attention_mask_fix` in `backend/asr.py` monkey-patches every `ParakeetEncoderAttention` instance with a near-verbatim copy of upstream's `forward`, with **one** constant changed:
+
+```python
+matrix_bd = matrix_bd.masked_fill(attention_mask.logical_not(), -1e4)  # was float("-inf")
+```
+
+Defaults: applied on every device (the bug is in the upstream port, not MPS-specific). Toggle with `OFFLINE_TRANSCRIBER_ASR_ENCODER_MASK_FIX=on|off|auto` (default `auto` = on). The pipeline records `encoder_attn_mask_fix` and `encoder_attn_mask_fix_layers` in the profile so we can verify the patch took.
+
+## When transformers gets bumped
+
+Re-check `ParakeetEncoderAttention.forward` against our `_patch_encoder_attention_mask_fix` body. If upstream still uses `float("-inf")`, keep our patch and refresh the rest of the body to match. If upstream switched to `-10000.0` (or any large finite value), we can delete the patch entirely — verify by running:
+
+```bash
+.venv/bin/python scripts/debug_empty_chunks.py path/to/rhcp.mp3
+```
+
+Expected on MPS+fp16 (no patch needed once upstream is fixed): all chunks return non-empty text and `enc.shape ... nan=0`. If any chunk shows `nan=359680`-style numbers, the bug is back; restore the patch.
+
+## Anti-patterns we already ruled out
+
+Do not "fix" empty chunks by reaching for these — the trace in `scripts/debug_empty_chunks.py` showed they don't help and they cost a lot:
+
+- `attn_implementation="eager"`: recovered 0 / 4 chunks (NaN is upstream of softmax).
+- `bf16`: recovered 0 / 4 chunks (8-bit exponent doesn't help, this isn't an overflow).
+- Conv1d/Conv2d/BatchNorm fp32 cast: recovered 0 / 4 chunks (NaN is downstream of conv stem).
+- Whole-encoder fp32: correct, but +1.2 GB MPS memory and ~30-40 % slower; pushed a 16 GB Mac into swap.
+- Attention math in fp32 with Q/K/V/O kept in fp16: correct *if combined with the mask fix*, but the fp32 casts cost ~10 s on the transcribe stage and aren't needed once the constant is right.

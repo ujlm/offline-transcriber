@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline Transcriber</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Offline Transcriber</h1>
+        <p class="subtitle">Local-only audio transcription &amp; diarization</p>
+      </header>
+
+      <section class="card">
+        <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
+          <div>
+            <strong>Drop an audio file here</strong>
+            <span>or select one from your computer</span>
+          </div>
+          <button id="pick-input" type="button">Select audio file</button>
+        </div>
+        <span id="input-path" class="path">No file selected</span>
+
+        <div class="row">
+          <button id="pick-output" type="button">Output folder</button>
+          <span id="output-path" class="path">(same folder as input)</span>
+        </div>
+
+        <div class="row">
+          <label for="language" class="label">Language</label>
+          <select id="language" class="select">
+            <option value="en" selected>English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+            <option value="nl">Nederlands</option>
+            <option value="pl">Polski</option>
+            <option value="el">Ελληνικά</option>
+            <option value="ar">العربية</option>
+            <option value="ja">日本語</option>
+            <option value="zh">中文</option>
+            <option value="vi">Tiếng Việt</option>
+            <option value="ko">한국어</option>
+          </select>
+        </div>
+
+        <label class="checkbox-row">
+          <input id="diarization" type="checkbox" checked />
+          <span>
+            <strong>Identify speakers</strong>
+            <small>Turn this off for faster single-speaker transcripts.</small>
+          </span>
+        </label>
+
+        <div class="row actions">
+          <button id="start" type="button" disabled>Start transcription</button>
+          <button id="cancel" type="button" hidden>Cancel</button>
+        </div>
+
+        <div id="progress" class="progress" hidden>
+          <div class="bar"><div id="bar-fill"></div></div>
+          <div class="status">
+            <span id="stage-label">idle</span>
+            <span id="percent-label">0%</span>
+          </div>
+        </div>
+
+        <div id="result" class="result" hidden>
+          <p id="result-text">Transcription complete.</p>
+          <button id="open-output" type="button">Open output folder</button>
+        </div>
+
+        <div id="error" class="error" hidden></div>
+      </section>
+
+      <section id="timecode-view" class="card transcript-card" hidden>
+        <div class="player">
+          <button id="play-pause" type="button" aria-label="Play audio">Play</button>
+          <span id="current-time" class="time">00:00</span>
+          <input id="seek" class="seek" type="range" min="0" max="0" step="0.1" value="0" />
+          <span id="duration" class="time">00:00</span>
+        </div>
+        <audio id="audio" preload="metadata"></audio>
+        <div class="transcript-header">
+          <h2>Timecoded transcript</h2>
+          <p>Click a timestamp to jump playback.</p>
+        </div>
+        <div id="transcript-list" class="transcript-list"></div>
+      </section>
+
+      <footer>
+        <small>Offline transcription · all processing on this device</small>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
